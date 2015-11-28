@@ -9,7 +9,6 @@ def home(req):
     return render(req, template_name='dummy.html', context = {'word': 'word!'})
 
 def login_post(req):
-    '''
     # TODO: 
     # 1) process credentials
     # 2) redirect to home on failure
