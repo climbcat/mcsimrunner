@@ -1,28 +1,30 @@
 <!DOCTYPE html>
 <html>
-  <head><title>simrunner - login</title></head>
-  <body>
+    <head>
+        <title>simrunner</title>
+    </head>
+    <body>
+        <form method="POST" action="/login">
+        {% csrf_token %}
+            <fieldset>
+                <legend>Login</legend>
+                <ul>
+                    <li>
+                        <label>Username:
+                            <input type="text" name="username">
+                        </label>
+                    </li>
+                    <li>
+                        <label>Password:
+                            <input type="password" name="password">
+                        </label>
+                    </li>
+                </ul>
+            </fieldset>
 
-    <h1>Login</h1>
-
-    {% block content %}
-    <form method="POST" action="/login">
-      {% csrf_token %}
-      <ul>
-        <li>
-          <label>Username:
-            <input type="text" name="username">
-          </label>
-        </li>
-        <li>
-          <label>Password:
-            <input type="password" name="password">
-          </label>
-        </li>
-      </ul>
-      <input type="submit" value="Login">
-    </form>
-    {% endblock %}
-
-  </body>
+            </fieldset>
+                <input type="submit" style="float:right" value="Login">
+            </fieldset>
+        </form>
+    </body>
 </html>

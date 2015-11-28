@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>simrunner</title>
+    </head>
+    <body>
+        <form method=post action="/startsim">
+        {% csrf_token %}
+            <fieldset>
+                <legend>Browse instrument groups:</legend>
+                <ul>
+                    {% for g in group_names %}
+                    <li>
+                        <a href="/instrument/{{ g }}">{{ g }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </fieldset>
+
+            <fieldset>
+                <legend>Instruments in {{ group_name }}:</legend>
+                <ul>
+                    {% for i in instr_names %}
+                    <li>
+                        <a href="/instrument/{{ group_name }}/{{ i }}">{{ i }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </fieldset>
+
+            <fieldset>
+                <legend>{{instr_name}}</legend>
+                <ul>
+                    {% for p in params %}
+                    <li>
+                        <label>{{ p.0 }}:
+                            <input type="text" value="{{ p.1 }}" name="{{ p.0 }}">
+                        </label>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </fieldset>
+
+            <fieldset>
+                <legend>Runtime configuration</legend>
+                <ul>
+                    <li>
+                        <label>Neutron rays:
+                             <input type=text value="{{ numpoints }}" name=numpoints/>
+                        </label>
+                    </li>
+                    <li>
+                        <label>Scan points:
+                            <input type=text value="{{ neutrons }}" name=neutrons/>
+                        </label>
+                    </li>
+                    <li>
+                        <label>Random seed:
+                            <input type=text value="{{ seed }}" name=seed/>
+                        </label>
+                    </li>
+                </ul>
+            </fieldset>
+
+            <fieldset>
+                <legend>Start simulation run</legend>
+                <input type=submit style="float:right" value="Run"/>
+            </fieldset>
+        </form>
+    </body>
+</html>

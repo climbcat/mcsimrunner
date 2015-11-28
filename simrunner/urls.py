@@ -18,6 +18,7 @@ from simrunner import views
 
 urlpatterns = [
     url(r'^instrument/(?P<group_name>\w+)/(?P<instr_name>\w+)/?$', views.instrument, name="instrument"),
+    url(r'^instrument/(?P<group_name>\w+)/?$', views.instrument, name="instrument"),
     url(r'^startsim/?$', views.instrument_post, name="instrument_post" ),
 
     url(r'^sim/(?P<simrun>\w)/?$', views.simrun, name="simrun" ),

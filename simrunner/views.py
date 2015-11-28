@@ -3,11 +3,11 @@
 '''
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
+from django.template.context import RenderContext
+from models import InstrGroup, Instrument, SimRun
 
 def home(req):
-    # TODO: render login form
     return render(req, template_name='login.html')
-    #return render(req, template_name='dummy.html', context = {'word': 'word!'})
 
 def login_post(req):
     form = req.POST
@@ -18,14 +18,12 @@ def login_post(req):
     if user is None or not user.is_active:
         return redirect(home)
     login(req, user)
+
+    # TODO: enable defaults on user object    
+    default_group = 'group1'
+    default_instr = 'PSI_DMC'
     
-    #return render(req, template_name='login.html')
-    
-    # TODO: 
-    # 1) process credentials
-    # 2) redirect to home on failure
-    # 3) redirect to instrument on success
-    return render(req, template_name='dummy.html', context = {'word': 'login_post'})
+    return redirect('instrument', group_name=default_group, instr_name=default_instr)
 
 def logout_user(req):
     if req.user is not None:
@@ -33,9 +31,30 @@ def logout_user(req):
     
     return redirect(home)
 
-    #return render(req, template_name='dummy.html', context = {'word': 'logout'})
-
-def instrument(req, group_name, instr_name):
+def instrument(req, group_name, instr_name=None):
+    group = InstrGroup.objects.get(name=group_name)
+    
+    # TODO: move the case of instr_name=None to another view, due to the need to render instrument params
+    if instr_name == None:
+        instr_name = Instrument.objects.filter(group=group)[0].displayname
+        
+    instr = Instrument.objects.get(name=group_name + '_' + instr_name)
+    
+    group_names = map(lambda g: g.name, InstrGroup.objects.all())
+    instr_names = map(lambda i: i.displayname, Instrument.objects.filter(group=group))
+    
+    params = instr.params
+    neutrons = 1000000
+    seed = 0
+    numpoints = 1
+    
+    
+    
+    
+    #return render(req, template_name='instrument.html', context=RenderContext({'numpoints': numpoints, 'neutrons': neutrons, 'seed': seed, 'params': params}))
+    return render(req, 'instrument.html', {'group_names': group_names, 'instr_names': instr_names, 'group_name': group.name, 'instr_name': instr.displayname, 
+                                           'numpoints': numpoints, 'neutrons': neutrons, 'seed': seed, 'params': params})
+    
     # TODO:
     # 1) get group and instrument from db
     # 2) get all group_names
