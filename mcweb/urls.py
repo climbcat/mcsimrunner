@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from simrunner import urls as simrunner_urls
 
 urlpatterns = [
+    url(r'^', include(simrunner_urls)),
     url(r'^admin/', include(admin.site.urls)),
 ]

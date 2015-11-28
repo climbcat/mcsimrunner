@@ -56,7 +56,7 @@ ROOT_URLCONF = 'mcweb.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['simrunner/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
