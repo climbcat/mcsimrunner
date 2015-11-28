@@ -6,20 +6,34 @@ from django.shortcuts import render, redirect
 
 def home(req):
     # TODO: render login form
-    return render(req, template_name='dummy.html', context = {'word': 'word!'})
+    return render(req, template_name='login.html')
+    #return render(req, template_name='dummy.html', context = {'word': 'word!'})
 
 def login_post(req):
+    form = req.POST
+    username = form.get('username', '')
+    password = form.get('password', '')
+    
+    user = authenticate(username=username, password=password)
+    if user is None or not user.is_active:
+        return redirect(home)
+    login(req, user)
+    
+    #return render(req, template_name='login.html')
+    
     # TODO: 
     # 1) process credentials
     # 2) redirect to home on failure
     # 3) redirect to instrument on success
     return render(req, template_name='dummy.html', context = {'word': 'login_post'})
 
-def logout(req):
-    # TODO:
-    # 1) logout the current user
-    # 2) redirect to home
-    return render(req, template_name='dummy.html', context = {'word': 'logout'})
+def logout_user(req):
+    if req.user is not None:
+        logout(req)
+    
+    return redirect(home)
+
+    #return render(req, template_name='dummy.html', context = {'word': 'logout'})
 
 def instrument(req, group_name, instr_name):
     # TODO:

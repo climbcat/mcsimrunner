@@ -23,6 +23,6 @@ urlpatterns = [
     url(r'^sim/(?P<simrun>\w)/?$', views.simrun, name="simrun" ),
 
     url(r'^login/?$', views.login_post, name='login_post'),
-    url(r'^logout/?$', views.logout, name='logout'),
+    url(r'^logout/?$', views.logout_user, name='logout_user'),
     url(r'^', views.home, name="home" ),
 ]
