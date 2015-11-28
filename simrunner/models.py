@@ -8,6 +8,9 @@ import json
 class InstrGroup(Model):
     ''' corresponds to a folder containing instruments '''
     name = CharField(max_length=200, unique=True)
+    
+    def __str__(self):
+        return self.name
 
 class Instrument(Model):
     ''' corresponds to a mcstas instrument contained in a certain folder '''
@@ -26,10 +29,14 @@ class Instrument(Model):
     @params.setter
     def params(self, p):
         self.params_str = json.dumps(p)
+    
+    def __str__(self):
+        return self.displayname
 
 class SimRun(Model):
     ''' corresponds to a simulation run of a particular instrument '''
     instrument = ForeignKey(Instrument)
+    instr_displayname = CharField(max_length=200)
     
     created = DateTimeField('date created', default=timezone.now)
     started = DateTimeField('date started', blank=True, null=True)
@@ -50,3 +57,5 @@ class SimRun(Model):
     def params(self, p):
         self.params_str = json.dumps(p)
     
+    def __str__(self):
+        return self.instr_displayname + self.created
