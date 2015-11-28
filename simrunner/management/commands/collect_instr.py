@@ -3,7 +3,7 @@ Collects all groups and instruments from disk and creates db objects.
 Already existing groups are unchanged, and already existing instruments 
 are updated with current params info.
 '''
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 import subprocess
 import os
 from simrunner.models import InstrGroup, Instrument
