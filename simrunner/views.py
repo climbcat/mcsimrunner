@@ -1,9 +1,8 @@
 '''
-
+simrunner functional views
 '''
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
-from django.template.context import RenderContext
 from models import InstrGroup, Instrument, SimRun
 
 def home(req):
@@ -48,20 +47,9 @@ def instrument(req, group_name, instr_name=None):
     seed = 0
     numpoints = 1
     
-    
-    
-    
-    #return render(req, template_name='instrument.html', context=RenderContext({'numpoints': numpoints, 'neutrons': neutrons, 'seed': seed, 'params': params}))
     return render(req, 'instrument.html', {'group_names': group_names, 'instr_names': instr_names, 'group_name': group.name, 'instr_name': instr.displayname, 
                                            'numpoints': numpoints, 'neutrons': neutrons, 'seed': seed, 'params': params})
     
-    # TODO:
-    # 1) get group and instrument from db
-    # 2) get all group_names
-    # 3) get instrument_names in this group
-    # 4) render instrument page
-    return render(req, template_name='dummy.html', context = {'word': 'instrument'})
-
 def instrument_post(req):
     # TODO: 
     # 1) get fields from form
