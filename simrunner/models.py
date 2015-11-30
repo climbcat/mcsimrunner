@@ -34,9 +34,10 @@ class Instrument(Model):
         return self.displayname
 
 class SimRun(Model):
-    ''' corresponds to a simulation run of a particular instrument '''
-    instrument = ForeignKey(Instrument)
-    instr_displayname = CharField(max_length=200)
+    ''' corresponds to a simulation run of a particular instrument - but SimRun is decoupled from the rest of the db '''
+    owner_username = CharField(max_length=200, blank=True, null=True)
+    group_name = CharField(max_length=200, blank=True, null=True)
+    instr_displayname = CharField(max_length=200, blank=True, null=True)
     
     created = DateTimeField('date created', default=timezone.now)
     started = DateTimeField('date started', blank=True, null=True)
@@ -58,4 +59,4 @@ class SimRun(Model):
         self.params_str = json.dumps(p)
     
     def __str__(self):
-        return self.instr_displayname + self.created
+        return "%s_%s_%s" % (self.owner_username, self.instr_displayname, str(self.created))

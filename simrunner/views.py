@@ -4,6 +4,7 @@ simrunner functional views
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from models import InstrGroup, Instrument, SimRun
+import json
 
 def home(req):
     return render(req, template_name='login.html')
@@ -39,22 +40,42 @@ def instrument(req, group_name, instr_name=None):
         
     instr = Instrument.objects.get(name=group_name + '_' + instr_name)
     
+    # collect properties
     group_names = map(lambda g: g.name, InstrGroup.objects.all())
-    instr_names = map(lambda i: i.displayname, Instrument.objects.filter(group=group))
-    
+    instr_displaynames = map(lambda i: i.displayname, Instrument.objects.filter(group=group))
     params = instr.params
     neutrons = 1000000
     seed = 0
-    numpoints = 1
+    scanpoints = 1
     
-    return render(req, 'instrument.html', {'group_names': group_names, 'instr_names': instr_names, 'group_name': group.name, 'instr_name': instr.displayname, 
-                                           'numpoints': numpoints, 'neutrons': neutrons, 'seed': seed, 'params': params})
+    return render(req, 'instrument.html', {'group_names': group_names, 'instr_displaynames': instr_displaynames, 'group_name': group.name, 'instr_displayname': instr.displayname, 
+                                           'scanpoints': scanpoints, 'neutrons': neutrons, 'seed': seed, 'params': params, 'params_jsonified': json.dumps(params)})
     
 def instrument_post(req):
+    form = req.POST
+    
+    owner_username = req.user.username
+    group_name = form.get('group_name')
+    instr_displayname = form.get('instr_displayname')
+    
+    neutrons = form.get('neutrons')
+    scanpoints = form.get('scanpoints')
+    seed = form.get('seed')
+    
+    params_default = json.loads(form.get('params_jsonified'))
+    params=[]
+    for p in params_default: 
+        form.get(p[0])
+        params.append([p[0], form.get(p[0])])
+    
+    simrun = SimRun(group_name=group_name, instr_displayname=instr_displayname, 
+                    owner_username=owner_username,
+                    neutrons=neutrons, scanpoints=scanpoints, seed=seed,
+                    params=params)
+    simrun.save()
+    
     # TODO: 
-    # 1) get fields from form
-    # 2) create simrun object
-    # 3) redirect to instrument
+    # 3) redirect to simrun status page
     return render(req, template_name='dummy.html', context = {'word': 'instrument_post'})
 
 def simrun(req, simrun):
