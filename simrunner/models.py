@@ -57,6 +57,16 @@ class SimRun(Model):
     @params.setter
     def params(self, p):
         self.params_str = json.dumps(p)
+        
+    def status(self):
+        if self.completed:
+            return 'complete'
+        elif self.failed:
+            return 'error'
+        elif self.started:
+            return 'running'
+        else:
+            return 'init'
     
     def __str__(self):
-        return "%s_%s_%s" % (self.owner_username, self.instr_displayname, str(self.created))
+        return "%s_%s_%s" % (self.owner_username, self.instr_displayname, str(self.created.strftime("%Y-%m-%d_%H:%M:%S")))

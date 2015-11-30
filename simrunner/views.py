@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from models import InstrGroup, Instrument, SimRun
 import json
+from django.utils import timezone
 
 def home(req):
     return render(req, template_name='login.html')
@@ -73,13 +74,36 @@ def instrument_post(req):
                     neutrons=neutrons, scanpoints=scanpoints, seed=seed,
                     params=params)
     simrun.save()
-    
-    # TODO: 
-    # 3) redirect to simrun status page
-    return render(req, template_name='dummy.html', context = {'word': 'instrument_post'})
+    return redirect('simrun', sim_id=simrun.id)
 
-def simrun(req, simrun):
-    # TODO:
-    # 1) get simrun object from db
-    # 2) render simrun page (consisting mostly of hrefs to static content)
-    return render(req, template_name='dummy.html', context = {'word': 'simrun'})
+def simrun_lin(req, sim_id):
+    ''' used for viewing lin scale images '''
+    return simrun(req, sim_id=sim_id, scale='lin')
+
+def simrun_log(req, sim_id):
+    ''' used for viewing lin scale images '''
+    return simrun(req, sim_id=sim_id, scale='log')
+
+def simrun(req, sim_id, scale='lin'):
+    ''' "%Y-%m-%d_%H:%M:%S" '''
+    simrun = SimRun.objects.get(id=sim_id) 
+    
+    new_scale = 'log'
+    if scale == 'log':
+        new_scale = 'lin'
+
+    data_folder = 'somefolder'
+    
+    dt_completed = 'n/a'
+    if simrun.completed:
+        dt_completed = simrun.completed.strftime("%H:%M")
+    
+    dt = timezone.now() - simrun.created
+    age_mins = dt.seconds / 60
+    
+    lin_log_url = '/sim/%s/%s' % (sim_id, new_scale)
+    
+    return render(req, 'status.html', {'instr_displayname': simrun.instr_displayname, 'params': simrun.params,
+                                       'date_time_created': simrun.created.strftime("%H:%M"), 'date_time_completed': dt_completed, 'age_mins': age_mins, 
+                                       'status': simrun.status,
+                                       'data_folder': data_folder, 'lin_log': new_scale, 'lin_log_url': lin_log_url})
