@@ -4,6 +4,7 @@ simrunner models
 from django.db.models import Model, CharField, TextField, ForeignKey, DateTimeField, PositiveIntegerField
 from django.utils import timezone
 import json
+from django.forms.fields import FilePathField
 
 class InstrGroup(Model):
     ''' corresponds to a folder containing instruments '''
@@ -39,16 +40,20 @@ class SimRun(Model):
     group_name = CharField(max_length=200, blank=True, null=True)
     instr_displayname = CharField(max_length=200, blank=True, null=True)
     
-    created = DateTimeField('date created', default=timezone.now)
-    started = DateTimeField('date started', blank=True, null=True)
-    completed = DateTimeField('date completed', blank=True, null=True)
-    failed = DateTimeField('date failed', blank=True, null=True)
-    
     neutrons = PositiveIntegerField(default=1000000)
     seed = PositiveIntegerField(default=0)
     scanpoints = PositiveIntegerField(default=1)
-    
     params_str = CharField(max_length=1000)
+    
+    # meta-fields below this line
+    created = DateTimeField('date created', default=timezone.now)
+    started = DateTimeField('date started', blank=True, null=True)
+    complete = DateTimeField('date complete', blank=True, null=True)
+    failed = DateTimeField('date failed', blank=True, null=True)
+    fail_str = CharField(max_length=1000, blank=True, null=True)
+    
+    data_folder = CharField(max_length=200, blank=True, null=True)
+    instr_filepath = CharField(max_length=200, blank=True, null=True)
     
     @property
     def params(self):
@@ -59,7 +64,7 @@ class SimRun(Model):
         self.params_str = json.dumps(p)
         
     def status(self):
-        if self.completed:
+        if self.complete:
             return 'complete'
         elif self.failed:
             return 'error'
