@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>simrunner</title>
+    <meta http-equiv="refresh" content="{{ refresh_rate }}" />
 </head>
 <body>
     <h3>{{ instr_displayname }}</h3>
@@ -14,11 +15,11 @@
     </fieldset>
 
     <fieldset>
-        <legend>Data plots (<a href="{{ lin_log_url }}">click here for {{ lin_log }}-scale</a>)</legend>
-    </fieldset>
-
-    <fieldset>
         <legend>Instrument layout</legend>
         <img src="/out/{{ data_folder }}/layout.wml"/>
+    </fieldset>
+
+    <fieldset style="visibility: {{ data_visibility }}">
+        <legend>Data plots (<a href="{{ lin_log_url }}">click here for {{ lin_log }}-scale</a>)</legend>
     </fieldset>
 </body>
