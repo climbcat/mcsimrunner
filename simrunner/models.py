@@ -4,7 +4,6 @@ simrunner models
 from django.db.models import Model, CharField, TextField, ForeignKey, DateTimeField, PositiveIntegerField
 from django.utils import timezone
 import json
-from django.forms.fields import FilePathField
 
 class InstrGroup(Model):
     ''' corresponds to a folder containing instruments '''
