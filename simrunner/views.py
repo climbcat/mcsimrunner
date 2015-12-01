@@ -4,7 +4,6 @@ simrunner functional views
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from models import InstrGroup, Instrument, SimRun
-from django.utils import timezone
 import json
 
 def home(req):
@@ -20,7 +19,7 @@ def login_post(req):
         return redirect(home)
     login(req, user)
 
-    # TODO: enable defaults on user object    
+    # TODO: enable defaults on user object
     default_group = 'group1'
     default_instr = 'PSI_DMC'
     
@@ -91,8 +90,6 @@ def simrun(req, sim_id, scale='lin'):
     new_scale = 'log'
     if scale == 'log':
         new_scale = 'lin'
-
-    data_folder = 'somefolder'
     
     time_complete = 'n/a'
     if simrun.complete:
@@ -107,7 +104,14 @@ def simrun(req, sim_id, scale='lin'):
         data_visibility = 'visible'
         refresh_rate = 3600
     
-    return render(req, 'status.html', {'instr_displayname': simrun.instr_displayname, 'params': simrun.params,
+    return render(req, 'status.html', {'instr_displayname': simrun.instr_displayname, 'neutrons': simrun.neutrons, 'seed': simrun.seed,
+                                       'scanpoints': simrun.scanpoints, 'params': simrun.params,
                                        'date_time_created': simrun.created.strftime("%H:%M %d/%m %Y"), 'date_time_completed': time_complete, 
                                        'status': simrun.status, 'data_visibility': data_visibility, 'refresh_rate': refresh_rate,
-                                       'data_folder': data_folder, 'lin_log': new_scale, 'lin_log_url': lin_log_url})
+                                       'data_folder': simrun.data_folder, 'lin_log': new_scale, 'lin_log_url': lin_log_url,
+                                       'plot_files': simrun.plot_files})
+
+
+
+
+

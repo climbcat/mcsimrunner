@@ -19,8 +19,8 @@ def mcplot(simrun, print_mcplot_output=False):
     ''' generates plots from simrun output data '''
     allfiles = [f for f in os.listdir(simrun.data_folder) if os.path.isfile(os.path.join(simrun.data_folder, f))]
     datfiles_nodir = [f for f in allfiles if os.path.splitext(f)[1] == '.dat']
-    pngfiles_nodir = [f for f in allfiles if os.path.splitext(f)[1] == '.png']
     datfiles = map(lambda f: os.path.join(simrun.data_folder, f), datfiles_nodir)
+    plot_files = []
     
     for f in datfiles: 
         cmd = 'mcplot-gnuplot-py -s %s' % f
@@ -38,7 +38,10 @@ def mcplot(simrun, print_mcplot_output=False):
         p = os.path.splitext(f)[0] + '.png'
         print('plot: %s' % p)
     
-    return pngfiles_nodir
+        plot_files.append(p)
+    
+    simrun.plot_files = plot_files
+    simrun.save()
 
 def mcdisplay(simrun, print_mcdisplay_output=False):
     ''' uses mcdisplay to generate layout.png and moves this file to simrun.data_folder '''
