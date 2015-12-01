@@ -11,11 +11,60 @@ import time
 class ExitException(Exception):
     pass
 
-def mcplot(simrun):
-    print 'mcplot %s' % simrun.instr_filepath
-    return
+def mcplot(simrun, print_mcplot_output=False):
+    #print('plotting to output files...')
+    
+    allfiles = [f for f in os.listdir(simrun.data_folder) if os.path.isfile(os.path.join(simrun.data_folder, f))]
+    datfiles_nodir = [f for f in allfiles if os.path.splitext(f)[1] == '.dat']
+    pngfiles_nodir = [f for f in allfiles if os.path.splitext(f)[1] == '.png']
+    datfiles = map(lambda f: os.path.join(simrun.data_folder, f), datfiles_nodir)
+    
+    for f in datfiles: 
+        cmd = 'mcplot-gnuplot-py -s %s' % f
+        process = subprocess.Popen(cmd,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE,
+                                   shell=True)
+        (stdoutdata, stderrdata) = process.communicate()
+        
+        if print_mcplot_output:
+            print(stdoutdata)
+            if (stderrdata is not None) and (stderrdata != ''):
+                raise Exception('mcplot error: %s' % stderrdata)
+        
+        p = os.path.splitext(f)[0] + '.png'
+        print('plot: %s' % p)
+    
+    return pngfiles_nodir
 
-def mcrun(simrun):
+def mcdisplay(simrun, print_mcdisplay_output=False):
+    #print('generating layout.png...')
+    
+    cmd = 'mcdisplay -png --multi %s -n1 ' % (simrun.instr_filepath)
+    for p in simrun.params:
+        cmd = cmd + ' %s=%s' % (p[0], p[1])
+    
+    process = subprocess.Popen(cmd,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               shell=True)
+    (stdoutdata, stderrdata) = process.communicate()
+    if print_mcdisplay_output:
+        print(stdoutdata)
+        if (stderrdata is not None) and (stderrdata != ''):
+            print(stderrdata)
+    
+    oldfilename = '%s.out.png' % os.path.splitext(simrun.instr_filepath)[0]
+    newfilename = os.path.join(simrun.data_folder, 'layout.png')
+    if os.path.exists(simrun.data_folder):
+        os.rename(oldfilename, newfilename)
+    else:
+        raise Exception('Data folder must exist before running this function (runworker.mcdisplay).')
+        
+    print 'layout: %s' % newfilename
+
+def mcrun(simrun, print_mcrun_output=False):
+    
     # assemble the run command :: NOTE: if we want the mpi param, e.g. "mpi=4", then it goes before instr filepath
     runstr = 'mcrun ' + simrun.instr_filepath + ' -d ' + simrun.data_folder
     runstr = runstr + ' -n ' + str(simrun.neutrons)
@@ -25,7 +74,9 @@ def mcrun(simrun):
     for p in simrun.params:
         runstr = runstr + ' ' + p[0] + '=' + p[1]
     
-    # pass to mcrun
+    print('simrun (%s)...' % runstr)
+    
+    # pass to mcdisplay
     process = subprocess.Popen(runstr,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
@@ -33,16 +84,15 @@ def mcrun(simrun):
     
     # TODO: implement a timeout (max simulation time)
     (stdoutdata, stderrdata) = process.communicate()
-    print(stdoutdata)
-    if (stderrdata is not None) and (stderrdata != ''):
-        print(stderrdata)
+    if print_mcrun_output:
+        print(stdoutdata)
+        if (stderrdata is not None) and (stderrdata != ''):
+            print(stderrdata)
     
     if process.returncode != 0:
         raise Exception('Instrument compile error.')
-
-def mcdisplay(simrun):
-    print 'mcdisplay %s' % simrun.instr_filepath
-    return
+    
+    print('data: %s' % simrun.data_folder)
 
 def create_instr_filepath(instr_basedir, group_name, instr_displayname):
     return '%s/%s/%s.instr' % (instr_basedir, group_name, instr_displayname)
@@ -69,7 +119,7 @@ def work():
         # exceptions raised during the processing block are written to the simrun object, but do not break the processing loop
         try:
             # mark object as processing initiated
-            print('processing simrun %s...' % simrun)
+            print('processing simrun for %s...' % simrun.instr_displayname)
             simrun.started = timezone.now()
             simrun.save()
             
@@ -82,15 +132,15 @@ def work():
             simrun.save()
             
             # process
-            mcdisplay(simrun)
             mcrun(simrun)
+            mcdisplay(simrun)
             mcplot(simrun)
             
             # finish
             simrun.complete = timezone.now()
             simrun.save()
             
-            print('processing done for %s' % simrun)
+            print('done (%s secs).' % (simrun.complete - simrun.started).seconds)
             
         except Exception as e:
             if e is ExitException:
@@ -99,7 +149,7 @@ def work():
             simrun.failed = timezone.now()
             simrun.fail_str = e.message
             simrun.save()
-            print('simrun failed: %s') % e.message
+            print('simrun fail: %s') % e.message
     
     if len(simrun_set) > 0:
         print("idle...")
